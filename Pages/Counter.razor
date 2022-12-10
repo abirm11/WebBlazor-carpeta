@@ -1,0 +1,63 @@
+﻿@page "/counter/{counterParam?}"
+@using Microsoft.Extensions.Configuration 
+@inject IConfiguration Confi 
+@inject ILogger<Counter> logger
+@inject IToastService toastService
+
+
+<PageTitle>Counter</PageTitle>
+
+<TitleModule Title="counter"/>
+
+@if (currentCount !=0)
+{
+    <p role="status">Current count: @currentCount</p>
+}
+
+
+<button class="btn btn-primary" @onclick="IncrementCount"> haz Click aqui </button>
+
+@code {
+    private int currentCount = 0;
+
+        protected override void OnInitialized()
+        {
+           if (counterParam is not null)
+           {
+            currentCount = int.Parse(counterParam);
+           }
+           else
+           {
+            currentCount = 0;
+           }
+           
+           logger.LogInformation($"Initializing componet currentCout={currentCount}");
+        }
+
+        [Parameter]
+        public string counterParam {get; set;}
+
+      public override async Task SetParametersAsync(ParameterView parameters)
+        {
+            if (parameters.TryGetValue<string>(nameof(counterParam), out var value))
+                {
+                    if (value is null)
+                    {
+                        counterParam = value;
+                    }
+
+                }
+        
+            await base.SetParametersAsync(parameters);
+        }
+    
+    private void IncrementCount()
+    {
+        var counterIncrese = int.Parse(Confi["counterIncrese"]);
+         currentCount = currentCount + counterIncrese ;
+         logger.LogInformation($"currentCount incresa by {counterIncrese}");
+         toastService.ShowInfo("Count Incresed");
+    }
+}
+
+
